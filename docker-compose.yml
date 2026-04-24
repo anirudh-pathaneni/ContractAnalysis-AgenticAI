@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  neo4j:
+    image: neo4j:5-community
+    ports:
+      - "7474:7474" # Browser WebUI
+      - "7687:7687" # Bolt port
+    environment:
+      - NEO4J_AUTH=neo4j/password
+    volumes:
+      - neo4j_data:/data
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=contract_intelligence
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  chromadb:
+    image: chromadb/chroma:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - chromadb_data:/chroma/chroma
+    restart: unless-stopped
+
+volumes:
+  neo4j_data:
+  postgres_data:
+  chromadb_data:
