@@ -37,7 +37,6 @@ class Neo4jClient:
     def add_cross_reference(self, clause_id, referenced_clause_id):
         query = """
         MATCH (cl1:Clause {id: $clause_id})
-        WaitMATCH (cl2:Clause {id: $referenced_clause_id}) // will fix typo in next
         MATCH (cl2:Clause {id: $referenced_clause_id})
         MERGE (cl1)-[:REFERENCES]->(cl2)
         """

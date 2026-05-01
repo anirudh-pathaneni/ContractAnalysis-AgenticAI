@@ -29,3 +29,4 @@ class ReviewState(TypedDict):
     uncertainties: List[str]
     overall_confidence: float
     remediation_suggestions: List[Dict[str, Any]]
+    statutory_citations: List[Dict[str, Any]]

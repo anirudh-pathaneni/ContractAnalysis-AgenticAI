@@ -23,15 +23,27 @@ def scholar_node(state: ReviewState) -> ReviewState:
     if not clauses:
         return state
         
-    # Example: fetch statute for a clause text logic
-    # We use vector_store.search_law
+    all_citations = []
     
-    search_query = f"jurisdiction: {jurisdiction}. {clauses[0].get('heading', '')}"
-    try:
-        results = vector_store.search_law(search_query)
-        logger.info(f"Scholar retrieved {len(results.get('documents', []))} references.")
-        # Store back in state - in real system append to specific clause metadata
-    except Exception as e:
-        logger.warning(f"Scholar retrieval failed or ChromaDB not initialized: {e}")
+    for clause in clauses:
+        search_query = f"Jurisdiction: {jurisdiction}. Topic: {clause.get('heading', '')}. Text: {clause.get('raw_text', '')}"
+        try:
+            results = vector_store.search_law(search_query)
+            if results and results.get('documents') and len(results['documents']) > 0:
+                for idx, doc_set in enumerate(results['documents']):
+                    for i, doc in enumerate(doc_set):
+                        meta = results['metadatas'][idx][i] if results.get('metadatas') else {}
+                        all_citations.append({
+                            "clause_id": clause["clause_id"],
+                            "statute": meta.get("statute", "Unknown Statute"),
+                            "text": doc
+                        })
+        except Exception as e:
+            logger.warning(f"Scholar retrieval failed: {e}")
+            break
 
+    current_citations = state.get("statutory_citations")
+    if current_citations is None:
+        current_citations = []
+    state["statutory_citations"] = current_citations + all_citations
     return state
